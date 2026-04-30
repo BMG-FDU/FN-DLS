@@ -362,3 +362,14 @@ def get_curves(map_cluster):
         else:
             pass
     return curve_pair
+def node_degree(net, node_con):
+    node_degree_list = []
+    for node in node_con:
+        node_degree_list.append(list(net.degree([node]))[0][1])
+    return node_degree_list
+def cal_circumferences(mask):
+    cnts, hierarchy = cv2.findContours(mask,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
+    len_list = []
+    for cnt in cnts:
+        len_list.append(len(cnt))
+    return len_list

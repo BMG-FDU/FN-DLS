@@ -7,10 +7,10 @@ from skimage import measure,color
 import networkx as nx
 import scipy.ndimage as ndi
 
-class segment_thin():
+class segment_thin():# 细化骨架
     def __init__():
         pass
-    def get_largest_connect(img):
+    def get_largest_connect(img):# 接受一个二值化的图像（img），寻找连通区域，并保留最大的连通区域。其他连通区域的像素值将被设置为0
         i = img.copy()
         s = generate_binary_structure(2,2)
         label, number = measurements.label(img, structure = s)
@@ -28,6 +28,9 @@ class segment_thin():
     def Zhang_Suen_thin(img):
         '''
         source: http://blog.csdn.net/jia20003/article/details/52142992
+        这个方法实现了Zhang-Suen细化算法。它接受一个彩色图像作为输入，并将其转换为二值图像。
+        然后，它会迭代地移除图像中的边缘像素，直到不能再移除任何像素。
+        最后，它返回一个细化后的二值图像。
         '''
         H, W, C = img.shape
 
@@ -123,17 +126,21 @@ class segment_thin():
         out = out.astype(np.uint8) * 255
         return out
 
-    def neighbours(x,y,image):
+    def neighbours(x,y,image):# 给定一个坐标（x，y）和一个图像，返回该坐标周围8个像素的值。
         img = image
         x_1, y_1, x1, y1 = x-1, y-1, x+1, y+1
         return [ img[x_1][y],img[x_1][y1],img[x][y1],img[x1][y1],         
                 img[x1][y], img[x1][y_1], img[x][y_1], img[x_1][y_1] ]    
 
-    def transitions(neighbours):
+    def transitions(neighbours):# 给定一个邻居像素值列表，计算从0到1的转换次数
         n = neighbours + neighbours[0:1]  
         return sum( (n1, n2) == (0, 1) for n1, n2 in zip(n, n[1:]) )  
      
     def zhangSuen(image):
+        '''这个方法是Zhang-Suen细化算法的另一种实现。
+        与Zhang_Suen_thin方法不同，这个方法接受一个二值图像作为输入。
+        它会迭代地移除图像中的边缘像素，直到不能再移除任何像素。
+        最后，它返回一个细化后的二值图像。'''
         Image_Thinned = image.copy()  
         changing1 = changing2 = 1
         while changing1 or changing2:  
@@ -165,6 +172,7 @@ class segment_thin():
             for x, y in changing2: 
                 Image_Thinned[x][y] = 0
         return Image_Thinned
+
 class node_find:
     def __init__(self, image):
         self.img = image
@@ -708,6 +716,7 @@ class network_builder():
 
     def path_to_seq(self, path):
         weight = []
+        seq = []
         for i in path:
             weight.append(self.node[i][1])
             seq.append((self.npos[i]))
@@ -717,7 +726,7 @@ class network_builder():
         edges = []
         for i in range(1,self.center_num+1):
             print(i)
-            for j in range(i, self.center_num-1):
+            for j in range(i+1, self.center_num-1):
                 if nx.has_path(self.net, i, j) is True:
                     path = nx.shortest_path(self.net, i, j)
                     path_check = path[1:-1]
